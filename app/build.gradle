@@ -1,0 +1,62 @@
+apply plugin: 'com.android.application'
+
+android {
+    compileSdkVersion versions.compileSdk
+    defaultConfig {
+        applicationId "com.krueger.flickr_search"
+        minSdkVersion versions.minSdk
+        targetSdkVersion versions.targetSdk
+        versionCode versions.code
+        versionName versions.name
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+
+//    configurations.all {
+//        resolutionStrategy {
+//            force libraries.supportAppCompat
+//        }
+//    }
+}
+
+dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+
+    implementation libraries.supportAppCompat
+    implementation libraries.supportRecyclerView
+
+    implementation libraries.constraintLayout
+    implementation libraries.lifecycleExtensions
+
+    implementation libraries.butterknife
+    annotationProcessor libraries.butterknifeApt
+
+    implementation libraries.daggerCore
+    annotationProcessor libraries.daggerApt
+    implementation libraries.daggerAndroid
+    implementation libraries.daggerAndroidSupport
+    annotationProcessor libraries.daggerAndroidApt
+
+    implementation libraries.okHttp
+    implementation libraries.retrofit
+    implementation libraries.retrofitMoshi
+    implementation libraries.retrofitRxJavaAdapter
+    implementation libraries.okHttpLoggingInterceptor
+    implementation libraries.moshi
+
+    implementation libraries.rxJava
+    implementation libraries.rxAndroid
+
+    implementation libraries.timber
+    implementation libraries.autoValue
+    annotationProcessor libraries.autoValueApt
+
+    testImplementation libraries.junit
+    androidTestImplementation libraries.testRunner
+    androidTestImplementation libraries.espresso
+}
