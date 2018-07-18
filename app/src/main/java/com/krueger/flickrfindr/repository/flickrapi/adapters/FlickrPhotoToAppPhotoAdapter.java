@@ -3,6 +3,7 @@ package com.krueger.flickrfindr.repository.flickrapi.adapters;
 import com.krueger.flickrfindr.models.Photo;
 import com.krueger.flickrfindr.models.PhotoResults;
 import com.krueger.flickrfindr.repository.flickrapi.models.FlickrPhoto;
+import com.krueger.flickrfindr.repository.flickrapi.models.FlickrPhotoPagingMetaData;
 import com.krueger.flickrfindr.repository.flickrapi.models.FlickrPhotoSearchResults;
 import com.squareup.moshi.FromJson;
 import com.squareup.moshi.ToJson;
@@ -11,6 +12,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import static com.krueger.flickrfindr.utils.StringUtils.getSafeInt;
 import static com.krueger.flickrfindr.utils.StringUtils.getSafeString;
 
 
@@ -28,9 +30,7 @@ public class FlickrPhotoToAppPhotoAdapter {
             }
         }
 
-        return PhotoResults.builder()
-                .setPhotoList(Collections.unmodifiableList(photoList))
-                .build();
+        return mapPhotoResultsFrom(photoList, results.flickrPhotoPagingMetaData);
     }
 
     private Photo mapPhotoFrom(FlickrPhoto flickrPhoto) {
@@ -57,6 +57,26 @@ public class FlickrPhotoToAppPhotoAdapter {
                 .setThumbnailUrl(thumbnailUrl)
                 .setLargePhotoUrl(largerPhotoUrl)
                 .build();
+    }
+
+    private PhotoResults mapPhotoResultsFrom(List<Photo> photoList, FlickrPhotoPagingMetaData metadata) {
+        int pageNo = 0;
+        int totalPages = 0;
+        int totalPhotos = 0;
+
+        if (metadata != null) {
+            pageNo = getSafeInt(metadata.page);
+            totalPages = getSafeInt(metadata.pages);
+            totalPhotos = getSafeInt(metadata.total);
+        }
+
+        return PhotoResults.builder()
+                .setPhotoList(Collections.unmodifiableList(photoList))
+                .setPageNo(pageNo)
+                .setTotalPages(totalPages)
+                .setTotalPhotos(totalPhotos)
+                .build();
+
     }
 
     @ToJson

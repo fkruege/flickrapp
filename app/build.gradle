@@ -22,6 +22,10 @@ android {
 //            force libraries.supportAppCompat
 //        }
 //    }
+    compileOptions {
+        targetCompatibility 1.8
+        sourceCompatibility 1.8
+    }
 }
 
 dependencies {
@@ -29,9 +33,12 @@ dependencies {
 
     implementation libraries.supportAppCompat
     implementation libraries.supportRecyclerView
-
+    implementation libraries.cardView
     implementation libraries.constraintLayout
+
     implementation libraries.lifecycleExtensions
+    implementation libraries.pagingRuntime
+    implementation libraries.pagingRx
 
     implementation libraries.butterknife
     annotationProcessor libraries.butterknifeApt
@@ -55,6 +62,9 @@ dependencies {
     implementation libraries.timber
     implementation libraries.autoValue
     annotationProcessor libraries.autoValueApt
+
+    implementation libraries.glide
+    annotationProcessor libraries.glideApt
 
     testImplementation libraries.junit
     androidTestImplementation libraries.testRunner

@@ -1,18 +1,26 @@
 package com.krueger.flickrfindr.ui.searchactivity.searchfragment;
 
+import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
+import android.arch.lifecycle.Transformations;
 import android.arch.lifecycle.ViewModel;
+import android.arch.paging.LivePagedListBuilder;
+import android.arch.paging.PagedList;
 
+import com.krueger.flickrfindr.models.Photo;
 import com.krueger.flickrfindr.models.PhotoResults;
 import com.krueger.flickrfindr.repository.PhotoRepository;
+import com.krueger.flickrfindr.ui.searchactivity.searchfragment.adapter.PhotoDataSourceFactory;
+import com.krueger.flickrfindr.utils.NetworkState;
+
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
 import javax.inject.Inject;
 
-import io.reactivex.SingleObserver;
-import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.disposables.Disposable;
-import io.reactivex.schedulers.Schedulers;
-import timber.log.Timber;
+import io.reactivex.disposables.CompositeDisposable;
+
+import static com.krueger.flickrfindr.utils.Common.PAGE_SIZE;
 
 // For paging
 // https://proandroiddev.com/8-steps-to-implement-paging-library-in-android-d02500f7fffe
@@ -20,43 +28,54 @@ import timber.log.Timber;
 
 public class SearchViewModel extends ViewModel {
 
-    private MutableLiveData<PhotoResults> photoResults;
+    private LiveData<NetworkState> networkState;
+    private LiveData<PagedList<Photo>> pagedPhotoListLiveData;
+
+
+    private CompositeDisposable compositeDisposable = new CompositeDisposable();
 
     private PhotoRepository photoRepository;
 
 
     @Inject
-    public SearchViewModel(PhotoRepository photoRepository) {
+    SearchViewModel(PhotoRepository photoRepository) {
         this.photoRepository = photoRepository;
     }
 
+//    LiveData<PhotoResults> photoResultsLiveData() {
+//        return photoResults;
+//    }
 
-    void search(String text) {
-        photoRepository.searchPhotosFor(text, 1)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new SingleObserver<PhotoResults>() {
-                    @Override
-                    public void onSubscribe(Disposable d) {
 
-                    }
+    void search(String query) {
 
-                    @Override
-                    public void onSuccess(PhotoResults results) {
-                        Timber.d("Success: " + results.photoList().size());
-                        photoResults.setValue(results);
-                    }
+        PhotoDataSourceFactory photoDataSourceFactory = new PhotoDataSourceFactory(photoRepository, query);
 
-                    @Override
-                    public void onError(Throwable e) {
-                        Timber.e(e, "Error retrieving photos.");
-                    }
-                });
+        networkState = Transformations.switchMap(photoDataSourceFactory.getMutableLiveData(), dataSource -> dataSource.getNetworkState());
+
+        PagedList.Config pagedListConfig
+                = new PagedList.Config.Builder()
+                .setEnablePlaceholders(false)
+                .setInitialLoadSizeHint(5)
+                .setPageSize(PAGE_SIZE)
+                .build();
+
+        pagedPhotoListLiveData = (new LivePagedListBuilder(photoDataSourceFactory, pagedListConfig))
+                .build();
 
     }
 
-    public void testMe() {
-        Timber.d("In SearchViewModel");
+    @Override
+    protected void onCleared() {
+        super.onCleared();
+        compositeDisposable.clear();
     }
 
+    public LiveData<NetworkState> getNetworkState() {
+        return networkState;
+    }
+
+    public LiveData<PagedList<Photo>> getPagedPhotoListLiveData() {
+        return pagedPhotoListLiveData;
+    }
 }

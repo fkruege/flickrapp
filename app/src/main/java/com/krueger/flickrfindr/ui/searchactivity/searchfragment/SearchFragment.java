@@ -1,24 +1,21 @@
 package com.krueger.flickrfindr.ui.searchactivity.searchfragment;
 
-import android.app.SearchManager;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
 
 import com.krueger.flickrfindr.R;
 import com.krueger.flickrfindr.app.injection.viewmodel.ViewModelFactory;
-
-import java.util.ArrayList;
-import java.util.List;
+import com.krueger.flickrfindr.ui.searchactivity.searchfragment.adapter.PhotoResultsAdapter;
 
 import javax.inject.Inject;
 
@@ -26,8 +23,6 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.Unbinder;
 import dagger.android.support.AndroidSupportInjection;
-
-import static android.content.Context.SEARCH_SERVICE;
 
 public class SearchFragment extends Fragment {
 
@@ -45,7 +40,8 @@ public class SearchFragment extends Fragment {
 
     private SearchViewModel searchViewModel;
 
-    public static List<String> searchHistory = new ArrayList<>();
+    private PhotoResultsAdapter photoResultsAdapter;
+
 
     public static SearchFragment newInstance() {
         return new SearchFragment();
@@ -69,6 +65,7 @@ public class SearchFragment extends Fragment {
         unbinder = ButterKnife.bind(this, view);
 
         setupSearchView();
+        setupPhotoRecyclerView();
 
         return view;
     }
@@ -98,6 +95,13 @@ public class SearchFragment extends Fragment {
             @Override
             public boolean onQueryTextSubmit(String query) {
                 searchViewModel.search(query);
+
+                searchViewModel.getPagedPhotoListLiveData().observe(SearchFragment.this, photos -> photoResultsAdapter.submitList(photos));
+
+                searchViewModel.getNetworkState().observe(SearchFragment.this, networkState -> {
+                    photoResultsAdapter.setNetworkState(networkState);
+                });
+
                 return false;
             }
 
@@ -108,7 +112,22 @@ public class SearchFragment extends Fragment {
         });
     }
 
-    private void setupPhotoRecyclerView(){
+    private void setupPhotoRecyclerView() {
+        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false);
+        photoResultsAdapter = new PhotoResultsAdapter(this);
+
+        rvPhotos.setLayoutManager(linearLayoutManager);
+        rvPhotos.setAdapter(photoResultsAdapter);
+
+//
+//                searchViewModel.photoResults.observe(this, new Observer<PhotoResults>() {
+//                    @Override
+//                    public void onChanged(@Nullable PhotoResults photoResults) {
+//                        photoResultsAdapter.update(photoResults);
+//                        photoResultsAdapter.notifyDataSetChanged();
+//                    }
+//                });
+
 
     }
 }
