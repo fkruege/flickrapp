@@ -2,10 +2,12 @@ package com.krueger.flickrfindr.ui.searchactivity.searchfragment;
 
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
+import android.content.res.Configuration;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
@@ -13,8 +15,12 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.bumptech.glide.Glide;
 import com.krueger.flickrfindr.R;
 import com.krueger.flickrfindr.app.injection.viewmodel.ViewModelFactory;
+import com.krueger.flickrfindr.models.Photo;
+import com.krueger.flickrfindr.ui.searchactivity.displayphotofragment.DisplayPhotoFragment;
+import com.krueger.flickrfindr.ui.searchactivity.searchfragment.adapter.PhotoClickListener;
 import com.krueger.flickrfindr.ui.searchactivity.searchfragment.adapter.PhotoResultsAdapter;
 
 import javax.inject.Inject;
@@ -24,7 +30,9 @@ import butterknife.ButterKnife;
 import butterknife.Unbinder;
 import dagger.android.support.AndroidSupportInjection;
 
-public class SearchFragment extends Fragment {
+public class SearchFragment extends Fragment implements PhotoClickListener {
+
+    private final String KEY_QUERY = "query";
 
     // Suggestions: https://abhiandroid.com/ui/searchview
     @BindView(R.id.search)
@@ -51,7 +59,6 @@ public class SearchFragment extends Fragment {
     public void onAttach(Context context) {
         AndroidSupportInjection.inject(this);
         super.onAttach(context);
-
         loadViewModel();
     }
 
@@ -61,18 +68,34 @@ public class SearchFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
 
-        View view = inflater.inflate(R.layout.main_fragment, container, false);
-        unbinder = ButterKnife.bind(this, view);
-
-        setupSearchView();
-        setupPhotoRecyclerView();
-
+        View view = inflater.inflate(R.layout.search_fragment, container, false);
         return view;
     }
 
     @Override
-    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+
+        unbinder = ButterKnife.bind(this, view);
+
+        setupPhotoRecyclerView();
+        setupSearchView();
+        setupQuery(savedInstanceState);
+    }
+
+    private void setupQuery(Bundle savedInstanceState) {
+        String query = "";
+        if (savedInstanceState != null && savedInstanceState.getString(KEY_QUERY) != null) {
+            query = savedInstanceState.getString(KEY_QUERY);
+        }
+
+        submitQuery(query);
+    }
+
+    @Override
+    public void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putString(KEY_QUERY, searchViewModel.currentQuery());
     }
 
     @Override
@@ -85,6 +108,27 @@ public class SearchFragment extends Fragment {
         searchViewModel = ViewModelProviders.of(this, viewModelFactory).get(SearchViewModel.class);
     }
 
+
+    private void setupPhotoRecyclerView() {
+
+        photoResultsAdapter = new PhotoResultsAdapter(this, Glide.with(this), () -> searchViewModel.retry());
+
+        rvPhotos.setAdapter(photoResultsAdapter);
+        rvPhotos.setLayoutManager(getLayoutManager());
+
+        searchViewModel.currentPhotoPagedList.observe(this, photos -> photoResultsAdapter.submitList(photos));
+        searchViewModel.networkState.observe(this, networkState -> photoResultsAdapter.setNetworkState(networkState));
+    }
+
+    private RecyclerView.LayoutManager getLayoutManager() {
+        if (this.getActivity().getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
+            return new GridLayoutManager(getContext(), 2);
+        } else {
+            return new LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false);
+        }
+    }
+
+
     private void setupSearchView() {
         addListenersToSearchView();
     }
@@ -94,14 +138,7 @@ public class SearchFragment extends Fragment {
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
-                searchViewModel.search(query);
-
-                searchViewModel.getPagedPhotoListLiveData().observe(SearchFragment.this, photos -> photoResultsAdapter.submitList(photos));
-
-                searchViewModel.getNetworkState().observe(SearchFragment.this, networkState -> {
-                    photoResultsAdapter.setNetworkState(networkState);
-                });
-
+                submitQuery(query);
                 return false;
             }
 
@@ -112,22 +149,19 @@ public class SearchFragment extends Fragment {
         });
     }
 
-    private void setupPhotoRecyclerView() {
-        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false);
-        photoResultsAdapter = new PhotoResultsAdapter(this);
+    private void submitQuery(String query) {
+        String trimmed = query.trim();
+        if (!trimmed.isEmpty()) {
+            if (searchViewModel.showNewSearch(trimmed)) {
+                rvPhotos.scrollToPosition(0);
+                photoResultsAdapter.submitList(null);
+            }
+        }
+    }
 
-        rvPhotos.setLayoutManager(linearLayoutManager);
-        rvPhotos.setAdapter(photoResultsAdapter);
-
-//
-//                searchViewModel.photoResults.observe(this, new Observer<PhotoResults>() {
-//                    @Override
-//                    public void onChanged(@Nullable PhotoResults photoResults) {
-//                        photoResultsAdapter.update(photoResults);
-//                        photoResultsAdapter.notifyDataSetChanged();
-//                    }
-//                });
-
-
+    @Override
+    public void photoClicked(Photo photo) {
+        DisplayPhotoFragment fragment = DisplayPhotoFragment.newInstance(photo.largePhotoUrl());
+        fragment.show(getFragmentManager(), fragment.getClass().getSimpleName());
     }
 }

@@ -1,12 +1,11 @@
 package com.krueger.flickrfindr.ui.searchactivity.searchfragment.adapter;
 
-import android.support.v4.app.Fragment;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.bumptech.glide.Glide;
+import com.bumptech.glide.RequestManager;
 import com.krueger.flickrfindr.R;
 import com.krueger.flickrfindr.models.Photo;
 
@@ -21,23 +20,21 @@ class PhotoViewHolder extends RecyclerView.ViewHolder {
     @BindView(R.id.txtTitle)
     TextView txtTitle;
 
-    private Fragment fragment;
-    private View view;
+    private RequestManager glideRequest;
+    private PhotoClickListener clickListener;
 
-
-    PhotoViewHolder(Fragment fragment, View view) {
+    PhotoViewHolder(View view, RequestManager glideRequest, PhotoClickListener clickListener) {
         super(view);
-        this.fragment = fragment;
-        this.view = view;
-        ButterKnife.bind(this, this.view);
+        this.glideRequest = glideRequest;
+        this.clickListener = clickListener;
+        ButterKnife.bind(this, view);
     }
 
     void bind(Photo photo) {
-        Glide.with(fragment)
-                .load(photo.thumbnailUrl())
-                .into(imgThumbnail);
-
+        glideRequest.load(photo.thumbnailUrl()).into(imgThumbnail);
         txtTitle.setText(photo.title());
+
+        imgThumbnail.setOnClickListener(v -> clickListener.photoClicked(photo));
     }
 
 }

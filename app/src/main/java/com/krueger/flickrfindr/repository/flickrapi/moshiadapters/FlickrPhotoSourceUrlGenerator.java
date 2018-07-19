@@ -1,4 +1,4 @@
-package com.krueger.flickrfindr.repository.flickrapi.adapters;
+package com.krueger.flickrfindr.repository.flickrapi.moshiadapters;
 
 class FlickrPhotoSourceUrlGenerator {
 
@@ -6,8 +6,8 @@ class FlickrPhotoSourceUrlGenerator {
     private final String URL_BODY = ".staticflickr.com/";
     private final String URL_SUFFIX = ".jpg";
 
-    private final String THUMBNAIL_CODE = "t";
-    private final String LARGE_CODE = "h";
+    private final String THUMBNAIL_CODE = "q";
+    private final String LARGE_CODE = "b";
 
     String generateThumbnailUrl(FlickrPhotoHolder photo) {
         return createUrl(photo, THUMBNAIL_CODE);

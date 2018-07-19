@@ -3,32 +3,37 @@ package com.krueger.flickrfindr.ui.searchactivity.searchfragment.adapter;
 import android.arch.lifecycle.MutableLiveData;
 import android.arch.paging.DataSource;
 
+import com.krueger.flickrfindr.models.Photo;
 import com.krueger.flickrfindr.repository.PhotoRepository;
 
-import javax.inject.Inject;
+import java.util.concurrent.Executor;
 
-public class PhotoDataSourceFactory extends DataSource.Factory {
+public class PhotoDataSourceFactory extends DataSource.Factory<Integer, Photo> {
 
-    private MutableLiveData<PhotoDataSource> mutableLiveData;
     private PhotoDataSource photoDataSource;
     private PhotoRepository photoRepository;
     private String query;
+    private Executor retryExecutor;
 
-    public PhotoDataSourceFactory(PhotoRepository photoRepository, String query) {
+    private MutableLiveData<PhotoDataSource> mutableLiveData;
+
+    public PhotoDataSourceFactory(PhotoRepository photoRepository, String query, Executor retryExecutor) {
         this.photoRepository = photoRepository;
         this.query = query;
+        this.retryExecutor = retryExecutor;
         this.mutableLiveData = new MutableLiveData<PhotoDataSource>();
     }
 
     @Override
     public DataSource create() {
-        photoDataSource = new PhotoDataSource(photoRepository, query);
+        photoDataSource = new PhotoDataSource(photoRepository, query, retryExecutor);
         mutableLiveData.postValue(photoDataSource);
         return photoDataSource;
     }
 
 
-    public MutableLiveData<PhotoDataSource> getMutableLiveData() {
+
+    public MutableLiveData<PhotoDataSource> getPhotoDataSourceLiveData() {
         return mutableLiveData;
     }
 }

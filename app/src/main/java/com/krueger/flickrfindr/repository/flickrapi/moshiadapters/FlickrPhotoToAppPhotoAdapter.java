@@ -1,4 +1,4 @@
-package com.krueger.flickrfindr.repository.flickrapi.adapters;
+package com.krueger.flickrfindr.repository.flickrapi.moshiadapters;
 
 import com.krueger.flickrfindr.models.Photo;
 import com.krueger.flickrfindr.models.PhotoResults;

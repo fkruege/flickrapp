@@ -2,25 +2,20 @@ package com.krueger.flickrfindr.ui.searchactivity.searchfragment;
 
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
-import android.arch.lifecycle.Transformations;
 import android.arch.lifecycle.ViewModel;
-import android.arch.paging.LivePagedListBuilder;
 import android.arch.paging.PagedList;
 
 import com.krueger.flickrfindr.models.Photo;
-import com.krueger.flickrfindr.models.PhotoResults;
-import com.krueger.flickrfindr.repository.PhotoRepository;
-import com.krueger.flickrfindr.ui.searchactivity.searchfragment.adapter.PhotoDataSourceFactory;
+import com.krueger.flickrfindr.ui.pagingsupport.Listing;
+import com.krueger.flickrfindr.ui.searchactivity.searchfragment.adapter.PagedPhotoRepository;
 import com.krueger.flickrfindr.utils.NetworkState;
-
-import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
 
 import javax.inject.Inject;
 
-import io.reactivex.disposables.CompositeDisposable;
+import timber.log.Timber;
 
-import static com.krueger.flickrfindr.utils.Common.PAGE_SIZE;
+import static android.arch.lifecycle.Transformations.map;
+import static android.arch.lifecycle.Transformations.switchMap;
 
 // For paging
 // https://proandroiddev.com/8-steps-to-implement-paging-library-in-android-d02500f7fffe
@@ -28,54 +23,65 @@ import static com.krueger.flickrfindr.utils.Common.PAGE_SIZE;
 
 public class SearchViewModel extends ViewModel {
 
-    private LiveData<NetworkState> networkState;
-    private LiveData<PagedList<Photo>> pagedPhotoListLiveData;
+    private PagedPhotoRepository pagedPhotoRepository;
 
+    final MutableLiveData<String> query = new MutableLiveData<>();
 
-    private CompositeDisposable compositeDisposable = new CompositeDisposable();
+    final LiveData<Listing<Photo>> searchResults = map(query, input -> pagedPhotoRepository.searchPhotos(input));
 
-    private PhotoRepository photoRepository;
+    final LiveData<PagedList<Photo>> currentPhotoPagedList = switchMap(searchResults, input -> input.getPagedList());
+
+    final LiveData<NetworkState> networkState = switchMap(searchResults, input -> {
+        return input.getNetworkState();
+    });
+    final LiveData<NetworkState> refreshState = switchMap(searchResults, input -> input.getRefreshState());
 
 
     @Inject
-    SearchViewModel(PhotoRepository photoRepository) {
-        this.photoRepository = photoRepository;
+    SearchViewModel(PagedPhotoRepository pagedPhotoRepository) {
+        this.pagedPhotoRepository = pagedPhotoRepository;
     }
 
-//    LiveData<PhotoResults> photoResultsLiveData() {
-//        return photoResults;
-//    }
-
-
-    void search(String query) {
-
-        PhotoDataSourceFactory photoDataSourceFactory = new PhotoDataSourceFactory(photoRepository, query);
-
-        networkState = Transformations.switchMap(photoDataSourceFactory.getMutableLiveData(), dataSource -> dataSource.getNetworkState());
-
-        PagedList.Config pagedListConfig
-                = new PagedList.Config.Builder()
-                .setEnablePlaceholders(false)
-                .setInitialLoadSizeHint(5)
-                .setPageSize(PAGE_SIZE)
-                .build();
-
-        pagedPhotoListLiveData = (new LivePagedListBuilder(photoDataSourceFactory, pagedListConfig))
-                .build();
-
+    void refresh() {
+        Listing<Photo> photoListing = getPhotoListing();
+        if (photoListing != null && photoListing.getRefreshAction() != null) {
+            try {
+                photoListing.getRefreshAction().run();
+            } catch (Exception e) {
+                Timber.e(e);
+            }
+        }
     }
 
-    @Override
-    protected void onCleared() {
-        super.onCleared();
-        compositeDisposable.clear();
+    boolean showNewSearch(String newQuery) {
+        if (query.getValue() != null && query.getValue().equals(newQuery)) {
+            return false;
+        }
+
+        query.setValue(newQuery);
+        return true;
     }
 
-    public LiveData<NetworkState> getNetworkState() {
-        return networkState;
+    void retry() {
+        Listing<Photo> photoListing = getPhotoListing();
+        if (photoListing != null && photoListing.getRetryAction() != null) {
+            try {
+                photoListing.getRetryAction().run();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
     }
 
-    public LiveData<PagedList<Photo>> getPagedPhotoListLiveData() {
-        return pagedPhotoListLiveData;
+    String currentQuery() {
+        return query.getValue();
+    }
+
+
+    private Listing<Photo> getPhotoListing() {
+        if (searchResults != null && searchResults.getValue() != null) {
+            return searchResults.getValue();
+        }
+        return null;
     }
 }

@@ -2,71 +2,67 @@ package com.krueger.flickrfindr.ui.searchactivity.searchfragment.adapter;
 
 import android.arch.paging.PagedListAdapter;
 import android.support.annotation.NonNull;
-import android.support.v4.app.Fragment;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.bumptech.glide.RequestManager;
 import com.krueger.flickrfindr.R;
 import com.krueger.flickrfindr.models.Photo;
 import com.krueger.flickrfindr.utils.NetworkState;
+
+import io.reactivex.functions.Action;
 
 public class PhotoResultsAdapter extends PagedListAdapter<Photo, RecyclerView.ViewHolder> {
 
     private static final int TYPE_PROGRESS = 0;
     private static final int TYPE_ITEM = 1;
+    private PhotoClickListener photoClickListener;
+    private final RequestManager glideRequest;
+    private final Action retryCallback;
 
     private NetworkState networkState;
 
-//    private PhotoResults photoResults;
-    private Fragment fragment;
-
-    public PhotoResultsAdapter(Fragment fragment) {
+    public PhotoResultsAdapter(PhotoClickListener photoClickListener, RequestManager glideRequest, Action retryCallback) {
         super(PhotoDiffUtil.DIFF_CALLBACK);
-        this.fragment = fragment;
-//        photoResults = PhotoResults.builder()
-//                .setPhotoList(Collections.<Photo>emptyList())
-//                .setTotalPhotos(0)
-//                .setTotalPages(0)
-//                .setPageNo(0)
-//                .build();
-    }
-
-    @NonNull
-    @Override
-    public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-
-        if(viewType == TYPE_PROGRESS) {
-            View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.card_network_loading, parent, false);
-            NetworkStateItemViewHolder viewHolder = new NetworkStateItemViewHolder(view);
-            return viewHolder;
-
-        } else {
-            View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.card_photo, parent, false);
-            PhotoViewHolder viewHolder = new PhotoViewHolder(fragment, view);
-            return viewHolder;
-        }
+        this.photoClickListener = photoClickListener;
+        this.glideRequest = glideRequest;
+        this.retryCallback = retryCallback;
     }
 
     @Override
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
-        if(holder instanceof PhotoViewHolder) {
+        if (holder instanceof PhotoViewHolder) {
             PhotoViewHolder photoViewHolder = (PhotoViewHolder) holder;
             Photo photo = getItem(position);
             photoViewHolder.bind(photo);
         } else {
             ((NetworkStateItemViewHolder) holder).bindView(networkState);
         }
-
-
     }
 
-    private boolean hasExtraRow() {
-        if (networkState != null && networkState != NetworkState.LOADED) {
-            return true;
+    @NonNull
+    @Override
+    public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+
+        if (viewType == TYPE_PROGRESS) {
+            View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.card_network_loading, parent, false);
+            return new NetworkStateItemViewHolder(view);
+
         } else {
-            return false;
+            View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.card_photo, parent, false);
+            return new PhotoViewHolder(view, glideRequest, photoClickListener);
+        }
+    }
+
+    @Override
+    public int getItemCount() {
+        int itemCount = super.getItemCount();
+        if (hasExtraRow()) {
+            return itemCount + 1;
+        } else {
+            return itemCount;
         }
     }
 
@@ -79,14 +75,15 @@ public class PhotoResultsAdapter extends PagedListAdapter<Photo, RecyclerView.Vi
         }
     }
 
-//    @Override
-//    public int getItemCount() {
-//        return photoResults.photoList().size();
-//    }
 
-//    public void update(PhotoResults photoResults) {
-//        this.photoResults = photoResults;
-//    }
+    private boolean hasExtraRow() {
+        if (networkState != null && networkState != NetworkState.LOADED) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
 
     public void setNetworkState(NetworkState newNetworkState) {
         NetworkState previousState = this.networkState;
@@ -95,9 +92,9 @@ public class PhotoResultsAdapter extends PagedListAdapter<Photo, RecyclerView.Vi
         boolean newExtraRow = hasExtraRow();
         if (previousExtraRow != newExtraRow) {
             if (previousExtraRow) {
-                notifyItemRemoved(getItemCount());
+                notifyItemRemoved(super.getItemCount());
             } else {
-                notifyItemInserted(getItemCount());
+                notifyItemInserted(super.getItemCount());
             }
         } else if (newExtraRow && previousState != newNetworkState) {
             notifyItemChanged(getItemCount() - 1);

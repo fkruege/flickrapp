@@ -3,7 +3,7 @@ package com.krueger.flickrfindr.repository.flickrapi.injection;
 import android.content.Context;
 
 import com.krueger.flickrfindr.repository.flickrapi.FlickrRestApi;
-import com.krueger.flickrfindr.repository.flickrapi.adapters.FlickrPhotoToAppPhotoAdapter;
+import com.krueger.flickrfindr.repository.flickrapi.moshiadapters.FlickrPhotoToAppPhotoAdapter;
 import com.squareup.moshi.Moshi;
 
 import javax.inject.Singleton;
