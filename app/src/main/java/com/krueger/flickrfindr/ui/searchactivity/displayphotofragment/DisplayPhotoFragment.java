@@ -5,16 +5,17 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.DialogFragment;
+import android.support.v4.widget.ContentLoadingProgressBar;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
-import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.engine.GlideException;
 import com.bumptech.glide.request.RequestListener;
+import com.bumptech.glide.request.RequestOptions;
 import com.bumptech.glide.request.target.Target;
 import com.krueger.flickrfindr.R;
 
@@ -29,8 +30,8 @@ public class DisplayPhotoFragment extends DialogFragment {
     @BindView(R.id.fullImage)
     ImageView imgFull;
 
-    @BindView(R.id.txtFullImageError)
-    TextView txtError;
+    @BindView(R.id.fullImageLoadingProgress)
+    ContentLoadingProgressBar progressBar;
 
     private Unbinder unbinder;
 
@@ -56,8 +57,7 @@ public class DisplayPhotoFragment extends DialogFragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.display_photo_fragment, container, false);
-        return view;
+        return inflater.inflate(R.layout.display_photo_fragment, container, false);
     }
 
 
@@ -76,35 +76,38 @@ public class DisplayPhotoFragment extends DialogFragment {
 
     private void loadImage() {
         String imageUrl = getImageUrl();
-        if (imageUrl.isEmpty()) {
-            displayError();
-        } else {
-            displayImage();
-
-            Glide.with(this).load(imageUrl).listener(new RequestListener<Drawable>() {
-                @Override
-                public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
-                    displayError();
-                    return false;
-                }
-
-                @Override
-                public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, DataSource dataSource, boolean isFirstResource) {
-                    return false;
-                }
-            }).into(imgFull);
-        }
+        loadUrlIntImage(imageUrl);
     }
 
-    private void displayError(){
-        imgFull.setVisibility(View.GONE);
-        txtError.setVisibility(View.VISIBLE);
+    private void loadUrlIntImage(String url) {
+        displayLoading();
+
+        Glide.with(this)
+                .load(url)
+                .apply(RequestOptions.noTransformation().error(R.mipmap.error_round))
+                .listener(new RequestListener<Drawable>() {
+                    @Override
+                    public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
+                        hideLoading();
+                        return false;
+                    }
+
+                    @Override
+                    public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, DataSource dataSource, boolean isFirstResource) {
+                        hideLoading();
+                        return false;
+                    }
+                })
+                .into(imgFull);
     }
 
 
-    private void displayImage(){
-        imgFull.setVisibility(View.VISIBLE);
-        txtError.setVisibility(View.GONE);
+    private void displayLoading() {
+        progressBar.setVisibility(View.VISIBLE);
+    }
+
+    private void hideLoading() {
+        progressBar.setVisibility(View.GONE);
     }
 
     private String getImageUrl() {

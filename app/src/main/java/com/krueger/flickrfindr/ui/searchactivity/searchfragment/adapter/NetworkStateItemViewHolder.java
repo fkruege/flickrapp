@@ -29,7 +29,7 @@ class NetworkStateItemViewHolder extends RecyclerView.ViewHolder {
         ButterKnife.bind(this, this.view);
     }
 
-    public void bindView(NetworkState networkState) {
+    void bindView(NetworkState networkState) {
         if (networkState != null && networkState.getStatus() == NetworkState.Status.RUNNING) {
             progressBar.setVisibility(View.VISIBLE);
         } else {

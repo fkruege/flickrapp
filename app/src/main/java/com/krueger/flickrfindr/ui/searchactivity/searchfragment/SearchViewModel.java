@@ -12,76 +12,65 @@ import com.krueger.flickrfindr.utils.NetworkState;
 
 import javax.inject.Inject;
 
-import timber.log.Timber;
-
 import static android.arch.lifecycle.Transformations.map;
 import static android.arch.lifecycle.Transformations.switchMap;
-
-// For paging
-// https://proandroiddev.com/8-steps-to-implement-paging-library-in-android-d02500f7fffe
-// https://codelabs.developers.google.com/codelabs/android-paging/index.html#8
 
 public class SearchViewModel extends ViewModel {
 
     private PagedPhotoRepository pagedPhotoRepository;
 
-    final MutableLiveData<String> query = new MutableLiveData<>();
+    private final MutableLiveData<String> query = new MutableLiveData<>();
 
-    final LiveData<Listing<Photo>> searchResults = map(query, input -> pagedPhotoRepository.searchPhotos(input));
-
-    final LiveData<PagedList<Photo>> currentPhotoPagedList = switchMap(searchResults, input -> input.getPagedList());
-
-    final LiveData<NetworkState> networkState = switchMap(searchResults, input -> {
-        return input.getNetworkState();
+    private final LiveData<Listing<Photo>> searchResults = map(query, input -> {
+        return pagedPhotoRepository.searchPhotos(input);
     });
-    final LiveData<NetworkState> refreshState = switchMap(searchResults, input -> input.getRefreshState());
 
+    private final LiveData<PagedList<Photo>> currentPhotoPagedList = switchMap(searchResults, input -> {
+        return input.getPagedList();
+    });
+
+    private final LiveData<NetworkState> networkState = switchMap(searchResults, input -> input.getNetworkState());
 
     @Inject
     SearchViewModel(PagedPhotoRepository pagedPhotoRepository) {
         this.pagedPhotoRepository = pagedPhotoRepository;
     }
 
-    void refresh() {
-        Listing<Photo> photoListing = getPhotoListing();
-        if (photoListing != null && photoListing.getRefreshAction() != null) {
-            try {
-                photoListing.getRefreshAction().run();
-            } catch (Exception e) {
-                Timber.e(e);
-            }
+    boolean showNewSearch(String newQuery) {
+        String trimmed = newQuery.trim();
+
+        if (isQueryValid(trimmed)) {
+            query.setValue(trimmed);
+            return true;
         }
+
+        return false;
     }
 
-    boolean showNewSearch(String newQuery) {
-        if (query.getValue() != null && query.getValue().equals(newQuery)) {
+    private boolean isQueryValid(String newQuery) {
+        if (newQuery.isEmpty()) {
             return false;
         }
 
-        query.setValue(newQuery);
-        return true;
-    }
-
-    void retry() {
-        Listing<Photo> photoListing = getPhotoListing();
-        if (photoListing != null && photoListing.getRetryAction() != null) {
-            try {
-                photoListing.getRetryAction().run();
-            } catch (Exception e) {
-                e.printStackTrace();
+        if (networkState.getValue() == null || networkState.getValue().getStatus() != NetworkState.Status.FAILED) {
+            if (query.getValue() != null && query.getValue().equals(newQuery)) {
+                return false;
             }
         }
+
+        return true;
     }
 
     String currentQuery() {
         return query.getValue();
     }
 
-
-    private Listing<Photo> getPhotoListing() {
-        if (searchResults != null && searchResults.getValue() != null) {
-            return searchResults.getValue();
-        }
-        return null;
+    LiveData<PagedList<Photo>> getCurrentPhotoPagedList() {
+        return currentPhotoPagedList;
     }
+
+    LiveData<NetworkState> getNetworkState() {
+        return networkState;
+    }
+
 }

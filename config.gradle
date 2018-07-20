@@ -10,6 +10,7 @@ ext.versions = [
         lifecycle         : "1.1.1",
         paging            : '1.0.0',
         pagingRx          : '1.0.0-rc1',
+        archTesting       : '1.1.1',
 
         // Android Support
         supportLibs       : '27.1.1',
@@ -44,6 +45,7 @@ ext.versions = [
         junit             : '4.12',
         testRunner        : '1.0.2',
         espresso          : '3.0.2',
+        mockito           : '2.19.1'
 
 ]
 
@@ -61,6 +63,7 @@ ext.libraries = [
         lifecycleExtensions     : "android.arch.lifecycle:extensions:$versions.lifecycle",
         pagingRuntime           : "android.arch.paging:runtime:$versions.paging",
         pagingRx                : "android.arch.paging:rxjava2:$versions.pagingRx",
+        archTesting             : "android.arch.core:core-testing:$versions.archTesting",
 
         // Dagger
         daggerCore              : "com.google.dagger:dagger:$versions.dagger",
@@ -98,17 +101,6 @@ ext.libraries = [
         junit                   : "junit:junit:$versions.junit",
         testRunner              : "com.android.support.test:runner:$versions.testRunner",
         espresso                : "com.android.support.test.espresso:espresso-core:$versions.espresso",
+        mockito                 : "org.mockito:mockito-core:$versions.mockito"
 
-//
-//        // 3rd
-//        realm                   : "io.realm:realm-gradle-plugin:$versions.realm",
-//        wire                    : "com.squareup.wire:wire-runtime:$versions.wire",
-//        dagger                  : "com.google.dagger:dagger:$versions.dagger",
-//        daggerCompiler          : "com.google.dagger:dagger-compiler:$versions.dagger",
-//        javaxAnnotations        : "javax.annotation:javax.annotation-api:$versions.javaxAnnotations",
-//        androidAnnotations      : "org.androidannotations:androidannotations:$versions.androidAnnotations",
-//        androidAnnotationsApi   : "org.androidannotations:androidannotations-api:$versions.androidAnnotations",
-//
-//        materialDialog          : "com.afollestad.material-dialogs:core:$versions.materialDialog",
-//        robotoTextView          : "com.github.johnkil.android-robototextview:robototextview:$versions.robotoTextView"
 ]

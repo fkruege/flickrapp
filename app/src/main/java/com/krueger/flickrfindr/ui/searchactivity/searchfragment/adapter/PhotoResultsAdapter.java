@@ -12,23 +12,20 @@ import com.krueger.flickrfindr.R;
 import com.krueger.flickrfindr.models.Photo;
 import com.krueger.flickrfindr.utils.NetworkState;
 
-import io.reactivex.functions.Action;
-
 public class PhotoResultsAdapter extends PagedListAdapter<Photo, RecyclerView.ViewHolder> {
 
     private static final int TYPE_PROGRESS = 0;
     private static final int TYPE_ITEM = 1;
     private PhotoClickListener photoClickListener;
     private final RequestManager glideRequest;
-    private final Action retryCallback;
 
     private NetworkState networkState;
 
-    public PhotoResultsAdapter(PhotoClickListener photoClickListener, RequestManager glideRequest, Action retryCallback) {
+    public PhotoResultsAdapter(PhotoClickListener photoClickListener, RequestManager glideRequest//, Action retryCallback
+    ) {
         super(PhotoDiffUtil.DIFF_CALLBACK);
         this.photoClickListener = photoClickListener;
         this.glideRequest = glideRequest;
-        this.retryCallback = retryCallback;
     }
 
     @Override
@@ -75,7 +72,6 @@ public class PhotoResultsAdapter extends PagedListAdapter<Photo, RecyclerView.Vi
         }
     }
 
-
     private boolean hasExtraRow() {
         if (networkState != null && networkState != NetworkState.LOADED) {
             return true;
@@ -83,7 +79,6 @@ public class PhotoResultsAdapter extends PagedListAdapter<Photo, RecyclerView.Vi
             return false;
         }
     }
-
 
     public void setNetworkState(NetworkState newNetworkState) {
         NetworkState previousState = this.networkState;

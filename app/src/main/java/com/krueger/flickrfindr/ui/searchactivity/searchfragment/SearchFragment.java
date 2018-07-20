@@ -34,7 +34,6 @@ public class SearchFragment extends Fragment implements PhotoClickListener {
 
     private final String KEY_QUERY = "query";
 
-    // Suggestions: https://abhiandroid.com/ui/searchview
     @BindView(R.id.search)
     SearchView searchView;
 
@@ -49,7 +48,6 @@ public class SearchFragment extends Fragment implements PhotoClickListener {
     private SearchViewModel searchViewModel;
 
     private PhotoResultsAdapter photoResultsAdapter;
-
 
     public static SearchFragment newInstance() {
         return new SearchFragment();
@@ -67,9 +65,7 @@ public class SearchFragment extends Fragment implements PhotoClickListener {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
-
-        View view = inflater.inflate(R.layout.search_fragment, container, false);
-        return view;
+        return inflater.inflate(R.layout.search_fragment, container, false);
     }
 
     @Override
@@ -104,20 +100,25 @@ public class SearchFragment extends Fragment implements PhotoClickListener {
         unbinder.unbind();
     }
 
+    @Override
+    public void photoClicked(Photo photo) {
+        rvPhotos.requestFocus();
+        DisplayPhotoFragment fragment = DisplayPhotoFragment.newInstance(photo.largePhotoUrl());
+        fragment.show(getChildFragmentManager(), fragment.getClass().getSimpleName());
+    }
+
     private void loadViewModel() {
         searchViewModel = ViewModelProviders.of(this, viewModelFactory).get(SearchViewModel.class);
     }
 
-
     private void setupPhotoRecyclerView() {
 
-        photoResultsAdapter = new PhotoResultsAdapter(this, Glide.with(this), () -> searchViewModel.retry());
-
+        photoResultsAdapter = new PhotoResultsAdapter(this, Glide.with(this));
         rvPhotos.setAdapter(photoResultsAdapter);
         rvPhotos.setLayoutManager(getLayoutManager());
 
-        searchViewModel.currentPhotoPagedList.observe(this, photos -> photoResultsAdapter.submitList(photos));
-        searchViewModel.networkState.observe(this, networkState -> photoResultsAdapter.setNetworkState(networkState));
+        searchViewModel.getCurrentPhotoPagedList().observe(this, photos -> photoResultsAdapter.submitList(photos));
+        searchViewModel.getNetworkState().observe(this, networkState -> photoResultsAdapter.setNetworkState(networkState));
     }
 
     private RecyclerView.LayoutManager getLayoutManager() {
@@ -150,18 +151,10 @@ public class SearchFragment extends Fragment implements PhotoClickListener {
     }
 
     private void submitQuery(String query) {
-        String trimmed = query.trim();
-        if (!trimmed.isEmpty()) {
-            if (searchViewModel.showNewSearch(trimmed)) {
-                rvPhotos.scrollToPosition(0);
-                photoResultsAdapter.submitList(null);
-            }
+        if (searchViewModel.showNewSearch(query)) {
+            rvPhotos.scrollToPosition(0);
+            photoResultsAdapter.submitList(null);
         }
     }
 
-    @Override
-    public void photoClicked(Photo photo) {
-        DisplayPhotoFragment fragment = DisplayPhotoFragment.newInstance(photo.largePhotoUrl());
-        fragment.show(getFragmentManager(), fragment.getClass().getSimpleName());
-    }
 }

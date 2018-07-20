@@ -5,10 +5,9 @@ import android.support.v7.util.DiffUtil;
 
 import com.krueger.flickrfindr.models.Photo;
 
-public class PhotoDiffUtil {
+class PhotoDiffUtil {
 
-
-    public static DiffUtil.ItemCallback<Photo> DIFF_CALLBACK = new DiffUtil.ItemCallback<Photo>() {
+    static DiffUtil.ItemCallback<Photo> DIFF_CALLBACK = new DiffUtil.ItemCallback<Photo>() {
         @Override
         public boolean areItemsTheSame(@NonNull Photo oldItem, @NonNull Photo newItem) {
             return oldItem.id().equals(newItem.id());

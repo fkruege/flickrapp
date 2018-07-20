@@ -6,31 +6,26 @@ import android.arch.paging.DataSource;
 import com.krueger.flickrfindr.models.Photo;
 import com.krueger.flickrfindr.repository.PhotoRepository;
 
-import java.util.concurrent.Executor;
-
 public class PhotoDataSourceFactory extends DataSource.Factory<Integer, Photo> {
 
     private PhotoDataSource photoDataSource;
     private PhotoRepository photoRepository;
     private String query;
-    private Executor retryExecutor;
 
     private MutableLiveData<PhotoDataSource> mutableLiveData;
 
-    public PhotoDataSourceFactory(PhotoRepository photoRepository, String query, Executor retryExecutor) {
+    PhotoDataSourceFactory(PhotoRepository photoRepository, String query) {
         this.photoRepository = photoRepository;
         this.query = query;
-        this.retryExecutor = retryExecutor;
-        this.mutableLiveData = new MutableLiveData<PhotoDataSource>();
+        this.mutableLiveData = new MutableLiveData<>();
     }
 
     @Override
     public DataSource create() {
-        photoDataSource = new PhotoDataSource(photoRepository, query, retryExecutor);
+        photoDataSource = new PhotoDataSource(photoRepository, query);
         mutableLiveData.postValue(photoDataSource);
         return photoDataSource;
     }
-
 
 
     public MutableLiveData<PhotoDataSource> getPhotoDataSourceLiveData() {

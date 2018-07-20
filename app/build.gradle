@@ -66,7 +66,9 @@ dependencies {
     implementation libraries.glide
     annotationProcessor libraries.glideApt
 
+    testImplementation libraries.archTesting
     testImplementation libraries.junit
+    testImplementation libraries.mockito
     androidTestImplementation libraries.testRunner
     androidTestImplementation libraries.espresso
 }
