@@ -79,15 +79,6 @@ public class SearchFragment extends Fragment implements PhotoClickListener {
         setupQuery(savedInstanceState);
     }
 
-    private void setupQuery(Bundle savedInstanceState) {
-        String query = "";
-        if (savedInstanceState != null && savedInstanceState.getString(KEY_QUERY) != null) {
-            query = savedInstanceState.getString(KEY_QUERY);
-        }
-
-        submitQuery(query);
-    }
-
     @Override
     public void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
@@ -112,7 +103,6 @@ public class SearchFragment extends Fragment implements PhotoClickListener {
     }
 
     private void setupPhotoRecyclerView() {
-
         photoResultsAdapter = new PhotoResultsAdapter(this, Glide.with(this));
         rvPhotos.setAdapter(photoResultsAdapter);
         rvPhotos.setLayoutManager(getLayoutManager());
@@ -149,6 +139,16 @@ public class SearchFragment extends Fragment implements PhotoClickListener {
             }
         });
     }
+
+    private void setupQuery(Bundle savedInstanceState) {
+        String query = "";
+        if (savedInstanceState != null && savedInstanceState.getString(KEY_QUERY) != null) {
+            query = savedInstanceState.getString(KEY_QUERY);
+        }
+
+        submitQuery(query);
+    }
+
 
     private void submitQuery(String query) {
         if (searchViewModel.showNewSearch(query)) {

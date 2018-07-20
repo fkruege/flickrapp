@@ -45,6 +45,7 @@ class PhotoViewHolder extends RecyclerView.ViewHolder {
         loadThumbnail(photo);
         txtTitle.setText(photo.title());
         imgThumbnail.setOnClickListener(v -> clickListener.photoClicked(photo));
+        txtTitle.setOnClickListener(v -> clickListener.photoClicked(photo));
     }
 
     private void loadThumbnail(Photo photo) {

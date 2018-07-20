@@ -16,7 +16,7 @@ public class PhotoRepository {
         this.flickrRestApi = flickrRestApi;
     }
 
-    public Single<PhotoResults> searchPhotosFor(String text, int pageNo) {
-        return flickrRestApi.searchPhotosFor(text, pageNo);
+    public Single<PhotoResults> searchPhotos(String text, int pageNo) {
+        return flickrRestApi.searchPhotosByTag(text, pageNo);
     }
 }

@@ -45,7 +45,7 @@ public class PhotoDataSource extends PageKeyedDataSource<Integer, Photo> {
 
         networkState.postValue(NetworkState.LOADING);
 
-        photoRepository.searchPhotosFor(query, 1)
+        photoRepository.searchPhotos(query, 1)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new SingleObserver<PhotoResults>() {
@@ -73,7 +73,7 @@ public class PhotoDataSource extends PageKeyedDataSource<Integer, Photo> {
 
         networkState.postValue(NetworkState.LOADING);
 
-        photoRepository.searchPhotosFor(query, params.key)
+        photoRepository.searchPhotos(query, params.key)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new SingleObserver<PhotoResults>() {
