@@ -24,7 +24,6 @@ public class NetworkState {
     static {
         LOADED=new NetworkState(Status.SUCCESS,"Success");
         LOADING=new NetworkState(Status.RUNNING,"Running");
-
     }
 
     public Status getStatus() {

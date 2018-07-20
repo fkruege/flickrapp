@@ -19,7 +19,7 @@ import io.reactivex.schedulers.Schedulers;
 // https://github.com/googlesamples/android-architecture-components/tree/master/PagingWithNetworkSample
 // https://proandroiddev.com/8-steps-to-implement-paging-library-in-android-d02500f7fffe
 // https://stackoverflow.com/questions/50759456/paging-library-data-source-with-specific-page-index/50759663
-public class PhotoDataSource extends PageKeyedDataSource<Integer, Photo> {
+class PhotoDataSource extends PageKeyedDataSource<Integer, Photo> {
 
     private CompositeDisposable compositeDisposable = new CompositeDisposable();
 
@@ -103,10 +103,6 @@ public class PhotoDataSource extends PageKeyedDataSource<Integer, Photo> {
         cleanUp();
     }
 
-    private void cleanUp() {
-        compositeDisposable.clear();
-    }
-
     LiveData<NetworkState> getNetworkState() {
         return networkState;
     }
@@ -115,6 +111,11 @@ public class PhotoDataSource extends PageKeyedDataSource<Integer, Photo> {
         String errorMessage = e == null ? "unknown error" : e.getMessage();
         NetworkState status = new NetworkState(NetworkState.Status.FAILED, errorMessage);
         networkState.postValue(status);
+    }
+
+
+    private void cleanUp() {
+        compositeDisposable.clear();
     }
 
 

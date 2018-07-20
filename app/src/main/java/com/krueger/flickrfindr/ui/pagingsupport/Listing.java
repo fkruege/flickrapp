@@ -16,10 +16,8 @@ public class Listing<T> {
             LiveData<PagedList<T>> pagedList
             , LiveData<NetworkState> networkState
     ) {
-
         this.pagedList = pagedList;
         this.networkState = networkState;
-
     }
 
     public LiveData<PagedList<T>> getPagedList() {

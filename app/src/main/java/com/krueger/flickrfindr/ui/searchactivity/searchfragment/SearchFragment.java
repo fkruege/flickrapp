@@ -32,6 +32,7 @@ import dagger.android.support.AndroidSupportInjection;
 
 public class SearchFragment extends Fragment implements PhotoClickListener {
 
+    private final int SPAN_COUNT = 2;
     private final String KEY_QUERY = "query";
 
     @BindView(R.id.search)
@@ -113,7 +114,7 @@ public class SearchFragment extends Fragment implements PhotoClickListener {
 
     private RecyclerView.LayoutManager getLayoutManager() {
         if (this.getActivity().getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
-            return new GridLayoutManager(getContext(), 2);
+            return new GridLayoutManager(getContext(), SPAN_COUNT);
         } else {
             return new LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false);
         }

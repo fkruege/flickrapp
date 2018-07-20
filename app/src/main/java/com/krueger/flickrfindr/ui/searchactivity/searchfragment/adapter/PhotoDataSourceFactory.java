@@ -6,7 +6,7 @@ import android.arch.paging.DataSource;
 import com.krueger.flickrfindr.models.Photo;
 import com.krueger.flickrfindr.repository.PhotoRepository;
 
-public class PhotoDataSourceFactory extends DataSource.Factory<Integer, Photo> {
+class PhotoDataSourceFactory extends DataSource.Factory<Integer, Photo> {
 
     private PhotoDataSource photoDataSource;
     private PhotoRepository photoRepository;
@@ -21,14 +21,14 @@ public class PhotoDataSourceFactory extends DataSource.Factory<Integer, Photo> {
     }
 
     @Override
-    public DataSource create() {
+    public DataSource<Integer, Photo> create() {
         photoDataSource = new PhotoDataSource(photoRepository, query);
         mutableLiveData.postValue(photoDataSource);
         return photoDataSource;
     }
 
 
-    public MutableLiveData<PhotoDataSource> getPhotoDataSourceLiveData() {
+    MutableLiveData<PhotoDataSource> getPhotoDataSourceLiveData() {
         return mutableLiveData;
     }
 }

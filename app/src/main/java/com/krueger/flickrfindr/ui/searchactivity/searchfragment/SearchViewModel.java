@@ -21,13 +21,9 @@ public class SearchViewModel extends ViewModel {
 
     private final MutableLiveData<String> query = new MutableLiveData<>();
 
-    private final LiveData<Listing<Photo>> searchResults = map(query, input -> {
-        return pagedPhotoRepository.searchPhotos(input);
-    });
+    private final LiveData<Listing<Photo>> searchResults = map(query, input -> pagedPhotoRepository.searchPhotos(input));
 
-    private final LiveData<PagedList<Photo>> currentPhotoPagedList = switchMap(searchResults, input -> {
-        return input.getPagedList();
-    });
+    private final LiveData<PagedList<Photo>> currentPhotoPagedList = switchMap(searchResults, input -> input.getPagedList());
 
     private final LiveData<NetworkState> networkState = switchMap(searchResults, input -> input.getNetworkState());
 

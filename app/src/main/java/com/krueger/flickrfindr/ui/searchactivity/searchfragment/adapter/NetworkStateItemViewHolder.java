@@ -20,13 +20,9 @@ class NetworkStateItemViewHolder extends RecyclerView.ViewHolder {
     @BindView(R.id.progress_bar)
     ProgressBar progressBar;
 
-
-    private View view;
-
     NetworkStateItemViewHolder(View view) {
         super(view);
-        this.view = view;
-        ButterKnife.bind(this, this.view);
+        ButterKnife.bind(this, view);
     }
 
     void bindView(NetworkState networkState) {

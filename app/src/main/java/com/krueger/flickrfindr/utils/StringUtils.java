@@ -15,11 +15,11 @@ public class StringUtils {
     }
 
     public static int getSafeInt(String value) {
-        if (value == null) {
-            return 0;
-        }
-
         int asInt = 0;
+
+        if (value == null) {
+            return asInt;
+        }
 
         try {
             asInt = Integer.parseInt(value);

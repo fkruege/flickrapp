@@ -3,7 +3,6 @@ package com.krueger.flickrfindr.app;
 import android.app.Activity;
 import android.app.Application;
 
-import com.bumptech.glide.annotation.GlideModule;
 import com.krueger.flickrfindr.app.injection.AppComponent;
 import com.krueger.flickrfindr.app.injection.DaggerAppComponent;
 
@@ -30,17 +29,17 @@ public class FlickrApp extends Application implements HasActivityInjector {
         plantTimber();
     }
 
+    @Override
+    public AndroidInjector<Activity> activityInjector() {
+        return androidInjector;
+    }
+
     private void injectDagger() {
         AppComponent appComponent = DaggerAppComponent.builder().application(this).build();
         appComponent.inject(this);
     }
 
-    private void plantTimber(){
+    private void plantTimber() {
         Timber.plant(new Timber.DebugTree());
-    }
-
-    @Override
-    public AndroidInjector<Activity> activityInjector() {
-        return androidInjector;
     }
 }
