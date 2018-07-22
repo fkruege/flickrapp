@@ -7,27 +7,14 @@
     android:layout_height="match_parent"
     tools:context=".ui.searchactivity.searchfragment.SearchFragment">
 
-    <android.support.v7.widget.SearchView
-        android:id="@+id/search"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:iconifiedByDefault="false"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:queryHint="@string/search_hint"
-        android:background="@color/colorAccent"
-        />
-
-
     <android.support.v7.widget.RecyclerView
         android:id="@+id/rvPhotos"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
+        android:layout_height="match_parent"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/search"
+        app:layout_constraintTop_toTopOf="parent"
         />
 
 

@@ -1,5 +1,6 @@
 package com.krueger.flickrfindr.ui.searchactivity.searchfragment;
 
+import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.content.res.Configuration;
@@ -10,7 +11,6 @@ import android.support.v4.app.Fragment;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.SearchView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -19,6 +19,7 @@ import com.bumptech.glide.Glide;
 import com.krueger.flickrfindr.R;
 import com.krueger.flickrfindr.app.injection.viewmodel.ViewModelFactory;
 import com.krueger.flickrfindr.models.Photo;
+import com.krueger.flickrfindr.ui.searchactivity.SearchViewModel;
 import com.krueger.flickrfindr.ui.searchactivity.displayphotofragment.DisplayPhotoFragment;
 import com.krueger.flickrfindr.ui.searchactivity.searchfragment.adapter.PhotoClickListener;
 import com.krueger.flickrfindr.ui.searchactivity.searchfragment.adapter.PhotoResultsAdapter;
@@ -32,11 +33,7 @@ import dagger.android.support.AndroidSupportInjection;
 
 public class SearchFragment extends Fragment implements PhotoClickListener {
 
-    private final int SPAN_COUNT = 2;
-    private final String KEY_QUERY = "query";
-
-    @BindView(R.id.search)
-    SearchView searchView;
+    private static final int SPAN_COUNT = 2;
 
     @BindView(R.id.rvPhotos)
     RecyclerView rvPhotos;
@@ -46,7 +43,7 @@ public class SearchFragment extends Fragment implements PhotoClickListener {
 
     private Unbinder unbinder;
 
-    private SearchViewModel searchViewModel;
+    SearchViewModel searchViewModel;
 
     private PhotoResultsAdapter photoResultsAdapter;
 
@@ -60,7 +57,6 @@ public class SearchFragment extends Fragment implements PhotoClickListener {
         super.onAttach(context);
         loadViewModel();
     }
-
 
     @Nullable
     @Override
@@ -76,14 +72,6 @@ public class SearchFragment extends Fragment implements PhotoClickListener {
         unbinder = ButterKnife.bind(this, view);
 
         setupPhotoRecyclerView();
-        setupSearchView();
-        setupQuery(savedInstanceState);
-    }
-
-    @Override
-    public void onSaveInstanceState(@NonNull Bundle outState) {
-        super.onSaveInstanceState(outState);
-        outState.putString(KEY_QUERY, searchViewModel.currentQuery());
     }
 
     @Override
@@ -100,7 +88,7 @@ public class SearchFragment extends Fragment implements PhotoClickListener {
     }
 
     private void loadViewModel() {
-        searchViewModel = ViewModelProviders.of(this, viewModelFactory).get(SearchViewModel.class);
+        searchViewModel = ViewModelProviders.of(getActivity(), viewModelFactory).get(SearchViewModel.class);
     }
 
     private void setupPhotoRecyclerView() {
@@ -108,7 +96,24 @@ public class SearchFragment extends Fragment implements PhotoClickListener {
         rvPhotos.setAdapter(photoResultsAdapter);
         rvPhotos.setLayoutManager(getLayoutManager());
 
+        // Order matters for this.
+        // The search query change needs to be observed first before observing paged results.
+        // If not the recycler view will not properly restore state on configuration change
+        observeSearchQueryChanges();
+        observeNewPageResults();
+
+        observeNetworkChanges();
+    }
+
+    private void observeSearchQueryChanges() {
+        searchViewModel.getQuery().observe(this, query -> photoResultsAdapter.submitList(null));
+    }
+
+    private void observeNewPageResults() {
         searchViewModel.getCurrentPhotoPagedList().observe(this, photos -> photoResultsAdapter.submitList(photos));
+    }
+
+    private void observeNetworkChanges() {
         searchViewModel.getNetworkState().observe(this, networkState -> photoResultsAdapter.setNetworkState(networkState));
     }
 
@@ -119,43 +124,4 @@ public class SearchFragment extends Fragment implements PhotoClickListener {
             return new LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false);
         }
     }
-
-
-    private void setupSearchView() {
-        addListenersToSearchView();
-    }
-
-    private void addListenersToSearchView() {
-
-        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
-            @Override
-            public boolean onQueryTextSubmit(String query) {
-                submitQuery(query);
-                return false;
-            }
-
-            @Override
-            public boolean onQueryTextChange(String newText) {
-                return false;
-            }
-        });
-    }
-
-    private void setupQuery(Bundle savedInstanceState) {
-        String query = "";
-        if (savedInstanceState != null && savedInstanceState.getString(KEY_QUERY) != null) {
-            query = savedInstanceState.getString(KEY_QUERY);
-        }
-
-        submitQuery(query);
-    }
-
-
-    private void submitQuery(String query) {
-        if (searchViewModel.showNewSearch(query)) {
-            rvPhotos.scrollToPosition(0);
-            photoResultsAdapter.submitList(null);
-        }
-    }
-
 }

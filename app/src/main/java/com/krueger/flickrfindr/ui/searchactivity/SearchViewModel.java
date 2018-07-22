@@ -1,4 +1,4 @@
-package com.krueger.flickrfindr.ui.searchactivity.searchfragment;
+package com.krueger.flickrfindr.ui.searchactivity;
 
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
@@ -32,7 +32,7 @@ public class SearchViewModel extends ViewModel {
         this.pagedPhotoRepository = pagedPhotoRepository;
     }
 
-    boolean showNewSearch(String newQuery) {
+    public boolean showNewSearch(String newQuery) {
         String trimmed = newQuery.trim();
 
         if (isQueryValid(trimmed)) {
@@ -57,15 +57,19 @@ public class SearchViewModel extends ViewModel {
         return true;
     }
 
-    String currentQuery() {
+    public String getCurrentQuery() {
         return query.getValue();
     }
 
-    LiveData<PagedList<Photo>> getCurrentPhotoPagedList() {
+    public LiveData<String> getQuery() {
+        return query;
+    }
+
+    public LiveData<PagedList<Photo>> getCurrentPhotoPagedList() {
         return currentPhotoPagedList;
     }
 
-    LiveData<NetworkState> getNetworkState() {
+    public LiveData<NetworkState> getNetworkState() {
         return networkState;
     }
 

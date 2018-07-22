@@ -2,5 +2,6 @@
     <string name="app_name">Flickr Findr</string>
     <string name="search_hint">Search Flickr ....</string>
     <string name="error_loading_image">Cannot load image</string>
+    <string name="search">Search</string>
 
 </resources>

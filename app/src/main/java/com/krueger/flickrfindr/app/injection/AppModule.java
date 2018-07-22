@@ -4,6 +4,7 @@ import android.content.Context;
 
 import com.krueger.flickrfindr.app.FlickrApp;
 import com.krueger.flickrfindr.app.injection.viewmodel.ViewModelModule;
+import com.krueger.flickrfindr.ui.searchactivity.searchsuggestions.FlickrSearchSuggestions;
 
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
@@ -26,4 +27,5 @@ public class AppModule {
     Executor provideNetworkExecutor() {
         return Executors.newFixedThreadPool(5);
     }
+
 }

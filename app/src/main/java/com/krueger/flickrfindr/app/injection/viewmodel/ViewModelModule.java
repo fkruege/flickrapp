@@ -3,7 +3,7 @@ package com.krueger.flickrfindr.app.injection.viewmodel;
 import android.arch.lifecycle.ViewModel;
 import android.arch.lifecycle.ViewModelProvider;
 
-import com.krueger.flickrfindr.ui.searchactivity.searchfragment.SearchViewModel;
+import com.krueger.flickrfindr.ui.searchactivity.SearchViewModel;
 
 import dagger.Binds;
 import dagger.Module;

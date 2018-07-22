@@ -6,6 +6,7 @@ import android.arch.paging.PagedList;
 
 import com.krueger.flickrfindr.models.Photo;
 import com.krueger.flickrfindr.ui.pagingsupport.Listing;
+import com.krueger.flickrfindr.ui.searchactivity.SearchViewModel;
 import com.krueger.flickrfindr.ui.searchactivity.searchfragment.adapter.PagedPhotoRepository;
 import com.krueger.flickrfindr.utils.NetworkState;
 

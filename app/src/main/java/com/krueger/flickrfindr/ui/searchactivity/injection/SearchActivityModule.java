@@ -7,7 +7,7 @@ import dagger.android.ContributesAndroidInjector;
 
 @Module
 public abstract class SearchActivityModule {
-    @ContributesAndroidInjector(modules = { SearchActivityFragmentsModule.class })
+    @ContributesAndroidInjector(modules = {SearchActivityFragmentsModule.class, SearchActivityDependenciesModule.class})
 
     abstract SearchActivity contributesActivity();
 
